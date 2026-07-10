@@ -22,7 +22,7 @@ app = FastAPI(
     version=config.API_VERSION
 )
 
-# ✅ UPDATED CORS middleware - Allow all origins for testing
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -31,7 +31,7 @@ app.add_middleware(
         "https://triumphant-strength-production.up.railway.app",
         "http://localhost:3000",
         "http://localhost:8000",
-        "*"  # Allow all origins (for testing - can be restricted later)
+        "*"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -98,6 +98,9 @@ async def ingest_data(data: FuelDataInput):
 @app.post("/api/v1/train", response_model=APIResponse)
 async def train_models(background_tasks: BackgroundTasks):
     """Train models on stored data"""
+    logger.info("=== TRAINING REQUEST RECEIVED ===")
+    logger.info(f"DATA_STORE length: {len(DATA_STORE)}")
+    
     if len(DATA_STORE) < config.MIN_TRAINING_SAMPLES:
         raise HTTPException(
             status_code=400,
@@ -110,25 +113,40 @@ async def train_models(background_tasks: BackgroundTasks):
     missing = [col for col in required_truth if col not in df.columns]
     
     if missing:
+        logger.error(f"Missing ground truth columns: {missing}")
         raise HTTPException(
             status_code=400,
             detail=f"Missing ground truth columns: {missing}"
         )
     
+    logger.info("Ground truth columns found. Starting training task...")
+    
     # Train in background
     def train_task():
         try:
+            logger.info("=== TRAINING TASK STARTED ===")
+            logger.info(f"Total records: {len(DATA_STORE)}")
+            
             # Prepare data
             training_df = predictor.create_training_data(DATA_STORE)
+            logger.info(f"Training data shape: {training_df.shape}")
             
             # Train all models
             metrics = predictor.train_all_models(training_df)
             logger.info(f"Models trained successfully: {metrics}")
+            
+            # Mark as trained
+            predictor.is_trained = True
+            logger.info("=== TRAINING COMPLETED SUCCESSFULLY ===")
+            
         except Exception as e:
             logger.error(f"Training failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             raise
     
     background_tasks.add_task(train_task)
+    logger.info("Training task added to background")
     
     return APIResponse(
         status="success",
