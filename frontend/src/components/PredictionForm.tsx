@@ -37,7 +37,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { fuelAPI } from '../services/api';
 import { FuelDataInput, FormData } from '../types';
-import ResultDashboard from './ResultDashboard';
+import ResultDashboard from './ResultDashboard.tsx';
 
 // Zod validation schema
 const formSchema = z.object({
