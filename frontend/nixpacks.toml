@@ -2,10 +2,10 @@
 nixPkgs = ["nodejs-18_x"]
 
 [phases.install]
-cmds = ["npm cache clean --force", "npm install --legacy-peer-deps --force"]
+cmds = ["npm install --legacy-peer-deps"]
 
 [phases.build]
-cmds = ["npm run build"]
+cmds = ["CI=false npm run build"]
 
 [start]
 cmd = "npx serve -s build -l 3000"
