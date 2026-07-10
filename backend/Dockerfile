@@ -1,24 +1,21 @@
-FROM python:3.11-slim
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+# Copy package files
+COPY package*.json ./
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Use npm install instead of npm ci (doesn't require package-lock.json)
+RUN npm install
 
-# Copy application code
+# Copy source code
 COPY . .
 
-# Create directories for models and data
-RUN mkdir -p models data
+# Build the app
+RUN npm run build
 
-# Expose port
-EXPOSE 8000
-
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Production server with nginx
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
