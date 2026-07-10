@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
@@ -32,13 +32,13 @@ class OBDData(BaseModel):
     engine_rpm: int = Field(..., gt=0, description="Engine speed in RPM")
     vehicle_speed_kmh: float = Field(..., ge=0, description="Vehicle speed in km/h")
     maf_g_s: float = Field(..., gt=0, description="Mass air flow in g/s")
-    lambda_value: float = Field(..., ge=0.5, le=1.5, description="Lambda value (air-fuel ratio)")
+    lambda_value: float = Field(1.0, ge=0.5, le=1.5, description="Lambda value (air-fuel ratio)")
     
-    @validator('lambda', pre=True)
-    def validate_lambda(cls, v):
-        if v is None:
-            return 1.0
-        return v
+    class Config:
+        populate_by_name = True
+        fields = {
+            'lambda_value': 'lambda'
+        }
 
 class DrivingContext(BaseModel):
     trip_duration_min: int = Field(..., gt=0, description="Trip duration in minutes")
