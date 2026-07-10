@@ -2,7 +2,7 @@
 nixPkgs = ["nodejs-18_x"]
 
 [phases.install]
-cmds = ["npm install --legacy-peer-deps --force"]
+cmds = ["npm cache clean --force", "npm install --legacy-peer-deps --force"]
 
 [phases.build]
 cmds = ["npm run build"]
