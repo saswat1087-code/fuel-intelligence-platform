@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
-from typing import Dict, Any, Optional
+from typing import List, Dict, Any, Optional
 import logging
 from .feature_engineer import FeatureEngineer
 from .models import PredictionResult
