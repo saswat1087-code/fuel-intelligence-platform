@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import PredictionForm from './components/PredictionForm';
 
+// Create a theme
 const theme = createTheme({
   palette: {
     primary: {
@@ -21,12 +22,13 @@ const theme = createTheme({
   },
 });
 
+// Create a client for React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });
