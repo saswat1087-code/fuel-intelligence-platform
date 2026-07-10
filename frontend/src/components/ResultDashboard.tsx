@@ -62,7 +62,8 @@ const ResultDashboard: React.FC<Props> = ({ result, onReset }) => {
     }
   };
 
-  const getRiskIcon = (level: string) => {
+  // ✅ FIXED: Return ReactElement, not null
+  const getRiskIcon = (level: string): React.ReactElement => {
     switch (level.toLowerCase()) {
       case 'low':
       case 'normal':
@@ -74,7 +75,7 @@ const ResultDashboard: React.FC<Props> = ({ result, onReset }) => {
       case 'critical':
         return <ErrorIcon sx={{ color: '#f44336' }} />;
       default:
-        return null;
+        return <CheckIcon sx={{ color: '#2196f3' }} />;
     }
   };
 
