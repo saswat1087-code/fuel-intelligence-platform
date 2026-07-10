@@ -26,7 +26,7 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
@@ -43,7 +43,7 @@ function App() {
                 ⛽ Fuel Intelligence Platform
               </Typography>
               <Typography variant="subtitle1" color="text.secondary">
-                AI-Powered Fuel Quality & Engine Health Analysis
+                AI-Powered Fuel Quality &amp; Engine Health Analysis
               </Typography>
             </Box>
             <PredictionForm />
