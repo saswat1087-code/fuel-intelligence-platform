@@ -22,10 +22,17 @@ app = FastAPI(
     version=config.API_VERSION
 )
 
-# CORS middleware
+# ✅ UPDATED CORS middleware - Allow all origins for testing
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=config.ALLOWED_ORIGINS,
+    allow_origins=[
+        "https://fuel-intelligence-platform-production.up.railway.app",
+        "https://fuel-intelligence-platform.up.railway.app",
+        "https://triumphant-strength-production.up.railway.app",
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "*"  # Allow all origins (for testing - can be restricted later)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
