@@ -599,7 +599,7 @@ const PredictionForm: React.FC = () => {
               {...field}
               label="Lambda"
               type="number"
-              step="0.01"
+              inputProps={{ step: "0.01" }}
               fullWidth
               error={!!errors.lambda}
               helperText={errors.lambda?.message}
