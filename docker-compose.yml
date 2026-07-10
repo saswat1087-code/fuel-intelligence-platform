@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: fuel-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./fuel_intelligence.db
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./backend/models:/app/models
+      - ./backend/data:/app/data
+    depends_on:
+      - redis
+    networks:
+      - fuel-network
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: fuel-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - fuel-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: fuel-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - fuel-network
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+
+networks:
+  fuel-network:
+    driver: bridge
