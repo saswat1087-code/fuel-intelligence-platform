@@ -45,7 +45,7 @@ class FeatureEngineer:
         df_copy['efficiency_ratio'] = df_copy['maf_g_s'] / (df_copy['vehicle_speed_kmh'] + 1)
 
         # Lambda deviation (ideal = 1.0)
-        df_copy['lambda_deviation'] = np.abs(df_copy['lambda'] - 1.0) * 100
+        df_copy['lambda_deviation'] = np.abs(df_copy['lambda_value'] - 1.0) * 100
 
         # Ethanol impact on stoich (stoich AFR drops with ethanol)
         df_copy['stoich_afr_estimate'] = 14.7 - (df_copy['ethanol_percent'] / 100 * 3.0)
