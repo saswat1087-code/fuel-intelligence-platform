@@ -38,7 +38,7 @@ class FeatureEngineer:
             df_copy['injector_pulse_width_ms'] * df_copy['engine_rpm'] / 1200
         )
 
-        # Fuel pressure deviation from ideal (for this engine)
+        # Fuel pressure deviation from ideal
         df_copy['fuel_pressure_deviation'] = np.abs(df_copy['fuel_pressure_kpa'] - 5800) / 5800
 
         # Efficiency ratio (MAF / speed)
@@ -47,17 +47,30 @@ class FeatureEngineer:
         # Lambda deviation (ideal = 1.0)
         df_copy['lambda_deviation'] = np.abs(df_copy['lambda_value'] - 1.0) * 100
 
-        # Ethanol impact on stoich (stoich AFR drops with ethanol)
+        # Ethanol impact on stoich
         df_copy['stoich_afr_estimate'] = 14.7 - (df_copy['ethanol_percent'] / 100 * 3.0)
 
-        # Road type encoding
+        # Road type encoding - FIXED: Use fit_transform for training, transform for prediction
         if 'road_type' in df_copy.columns:
             if not self._fitted:
-                self.road_encoder.fit(df_copy['road_type'].astype(str))
+                # During training: fit and transform
+                df_copy['road_type_encoded'] = self.road_encoder.fit_transform(
+                    df_copy['road_type'].astype(str)
+                )
                 self._fitted = True
-            df_copy['road_type_encoded'] = self.road_encoder.transform(
-                df_copy['road_type'].astype(str)
-            )
+                # Save the encoder
+                joblib.dump(self.road_encoder, f"{self.model_dir}/road_encoder.pkl")
+            else:
+                # During prediction: only transform
+                try:
+                    df_copy['road_type_encoded'] = self.road_encoder.transform(
+                        df_copy['road_type'].astype(str)
+                    )
+                except ValueError as e:
+                    # If unseen label, use a default value (0)
+                    print(f"Warning: {e}. Using default encoding.")
+                    # Map unknown values to 0
+                    df_copy['road_type_encoded'] = 0
 
         # Calculate component risk scores
         df_copy['deposit_risk_score'] = (
@@ -92,7 +105,6 @@ class FeatureEngineer:
         if not self._fitted:
             self.scaler.fit(df_scaled[feature_cols])
             self._fitted = True
-            # Save scaler
             joblib.dump(self.scaler, f"{self.model_dir}/scaler.pkl")
         
         df_scaled[feature_cols] = self.scaler.transform(df_scaled[feature_cols])
@@ -104,3 +116,8 @@ class FeatureEngineer:
         if os.path.exists(scaler_path):
             self.scaler = joblib.load(scaler_path)
             self._fitted = True
+        
+        # Also load the road encoder
+        encoder_path = f"{self.model_dir}/road_encoder.pkl"
+        if os.path.exists(encoder_path):
+            self.road_encoder = joblib.load(encoder_path)
